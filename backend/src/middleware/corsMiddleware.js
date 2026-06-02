@@ -1,14 +1,25 @@
 export const corsMiddleware = (req, res, next) => {
   const origin = req.headers.origin;
-  
-  // Allow localhost with any port in development
-  const isLocalhost = origin && (
-    origin.startsWith('http://localhost:') ||
-    origin.startsWith('http://127.0.0.1:')
+
+  const allowedOrigins = (process.env.CORS_ORIGINS || process.env.FRONTEND_URL || '')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  const isLocalhost = Boolean(
+    origin && (
+      origin.startsWith('http://localhost:') ||
+      origin.startsWith('http://127.0.0.1:')
+    )
   );
-  
-  if (isLocalhost || process.env.NODE_ENV === 'production') {
-    res.setHeader('Access-Control-Allow-Origin', origin || '*');
+
+  const isAllowedOrigin = Boolean(origin) && (isLocalhost || allowedOrigins.includes(origin));
+
+  // Requests from servers/tools may not include Origin; allow those.
+  if (!origin) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+  } else if (isAllowedOrigin) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
   }
 
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
