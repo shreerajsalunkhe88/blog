@@ -150,7 +150,11 @@ export default function EditPostPage() {
           <FormTextarea
             label="Short Description"
             placeholder="A brief overview of your post"
-            {...register('shortDescription')}
+            {...register('shortDescription', {
+              required: 'Short description is required',
+              minLength: { value: 10, message: 'Short description must be at least 10 characters' },
+              maxLength: { value: 500, message: 'Short description must not exceed 500 characters' }
+            })}
             error={errors.shortDescription?.message}
             rows={3}
           />
@@ -176,7 +180,6 @@ export default function EditPostPage() {
           >
             <option value="Draft">Draft</option>
             <option value="Published">Published</option>
-            <option value="Archived">Archived</option>
           </FormSelect>
 
           {/* Tags */}

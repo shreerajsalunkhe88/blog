@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import Link from 'next/link';
 import { Layout } from '@/components/layout/Layout';
 import { FormInput } from '@/components/common/FormInput';
@@ -132,7 +132,11 @@ export default function CreatePostPage() {
           <FormTextarea
             label="Short Description"
             placeholder="A brief overview of your post"
-            {...register('shortDescription')}
+            {...register('shortDescription', {
+              required: 'Short description is required',
+              minLength: { value: 10, message: 'Short description must be at least 10 characters' },
+              maxLength: { value: 500, message: 'Short description must not exceed 500 characters' }
+            })}
             error={errors.shortDescription?.message}
             rows={3}
           />
@@ -158,7 +162,6 @@ export default function CreatePostPage() {
           >
             <option value="Draft">Draft</option>
             <option value="Published">Published</option>
-            <option value="Archived">Archived</option>
           </FormSelect>
 
           {/* Tags */}

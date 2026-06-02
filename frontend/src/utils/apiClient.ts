@@ -61,7 +61,17 @@ class ApiClient {
 
   private handleError(error: any) {
     if (error.response?.data) {
-      return new Error(error.response.data.message || 'An error occurred');
+      const { message, errors } = error.response.data;
+      if (Array.isArray(errors) && errors.length > 0) {
+        const firstError = errors[0];
+        if (typeof firstError === 'string') {
+          return new Error(firstError);
+        }
+        if (typeof firstError?.message === 'string') {
+          return new Error(firstError.message);
+        }
+      }
+      return new Error(message || 'An error occurred');
     }
     if (error.message === 'Network Error') {
       return new Error('Network error. Please check your connection.');

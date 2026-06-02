@@ -41,8 +41,9 @@ export const validateCreateBlogPost = [
     .isIn(['Technology', 'Design', 'Business', 'Lifestyle', 'Travel', 'Food', 'Health', 'Education'])
     .withMessage('Invalid category'),
   body('shortDescription')
-    .optional({ checkFalsy: true })
     .trim()
+    .notEmpty()
+    .withMessage('Short description is required')
     .isLength({ min: 10, max: 500 })
     .withMessage('Short description must be between 10 and 500 characters'),
   body('content')
@@ -53,7 +54,7 @@ export const validateCreateBlogPost = [
     .withMessage('Content must be at least 50 characters'),
   body('status')
     .optional()
-    .isIn(['Draft', 'Published', 'Archived'])
+    .isIn(['Draft', 'Published'])
     .withMessage('Invalid status'),
   body('tags')
     .optional()
