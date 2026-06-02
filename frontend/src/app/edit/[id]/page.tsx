@@ -14,6 +14,10 @@ import { blogService } from '@/services/blogService';
 import type { CreateBlogPostPayload } from '@/types';
 import { CATEGORIES } from '@/utils/constants';
 
+type EditPostFormData = Omit<CreateBlogPostPayload, 'tags'> & {
+  tags?: string;
+};
+
 export default function EditPostPage() {
   const router = useRouter();
   const params = useParams();
@@ -27,7 +31,7 @@ export default function EditPostPage() {
     handleSubmit,
     setValue,
     formState: { errors },
-  } = useForm<CreateBlogPostPayload>();
+  } = useForm<EditPostFormData>();
 
   useEffect(() => {
     if (postId) {
@@ -46,7 +50,7 @@ export default function EditPostPage() {
       setValue('shortDescription', post.shortDescription || '');
       setValue('content', post.content);
       setValue('status', post.status);
-      setValue('tags', post.tags || []);
+      setValue('tags', (post.tags || []).join(', '));
       setValue('thumbnailUrl', post.thumbnailUrl || '');
     } catch (error: any) {
       notifyError(error.message || 'Failed to load post');
@@ -56,15 +60,14 @@ export default function EditPostPage() {
     }
   };
 
-  const onSubmit = async (data: CreateBlogPostPayload) => {
+  const onSubmit = async (data: EditPostFormData) => {
     try {
       setIsSubmitting(true);
-      // Parse tags from comma-separated string to array
-      const processedData = {
+      const processedData: CreateBlogPostPayload = {
         ...data,
-        tags: typeof data.tags === 'string' 
-          ? data.tags.split(',').map(tag => tag.trim()).filter(Boolean)
-          : data.tags || [],
+        tags: data.tags
+          ? data.tags.split(',').map((tag) => tag.trim()).filter(Boolean)
+          : [],
       };
       await blogService.updatePost(postId, processedData);
       notifySuccess('Post updated successfully');

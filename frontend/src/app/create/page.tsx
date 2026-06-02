@@ -14,6 +14,10 @@ import { blogService } from '@/services/blogService';
 import type { CreateBlogPostPayload } from '@/types';
 import { CATEGORIES } from '@/utils/constants';
 
+type CreatePostFormData = Omit<CreateBlogPostPayload, 'tags'> & {
+  tags?: string;
+};
+
 export default function CreatePostPage() {
   const router = useRouter();
   const { notifySuccess, notifyError } = useNotification();
@@ -24,7 +28,7 @@ export default function CreatePostPage() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<CreateBlogPostPayload>({
+  } = useForm<CreatePostFormData>({
     defaultValues: {
       title: '',
       author: '',
@@ -33,20 +37,19 @@ export default function CreatePostPage() {
       shortDescription: '',
       content: '',
       status: 'Draft',
-      tags: [],
+      tags: '',
       thumbnailUrl: '',
     },
   });
 
-  const onSubmit = async (data: CreateBlogPostPayload) => {
+  const onSubmit = async (data: CreatePostFormData) => {
     try {
       setIsSubmitting(true);
-      // Parse tags from comma-separated string to array
-      const processedData = {
+      const processedData: CreateBlogPostPayload = {
         ...data,
-        tags: typeof data.tags === 'string' 
-          ? data.tags.split(',').map(tag => tag.trim()).filter(Boolean)
-          : data.tags || [],
+        tags: data.tags
+          ? data.tags.split(',').map((tag) => tag.trim()).filter(Boolean)
+          : [],
       };
       await blogService.createPost(processedData);
       notifySuccess('Post created successfully');
