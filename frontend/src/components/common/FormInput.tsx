@@ -1,0 +1,44 @@
+'use client';
+
+import React from 'react';
+
+interface FormInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  label?: string;
+  error?: string;
+  helperText?: string;
+  required?: boolean;
+}
+
+export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
+  ({ label, error, helperText, required, ...props }, ref) => {
+    return (
+      <div className="mb-4">
+        {label && (
+          <label className="label-base">
+            {label}
+            {required && <span className="text-red-600 ml-1">*</span>}
+          </label>
+        )}
+        <input
+          ref={ref}
+          {...props}
+          className={`input-base ${error ? 'input-error' : ''}`}
+          aria-invalid={!!error}
+          aria-describedby={error ? `${props.name}-error` : helperText ? `${props.name}-help` : undefined}
+        />
+        {error && (
+          <p id={`${props.name}-error`} className="text-error mt-1">
+            {error}
+          </p>
+        )}
+        {helperText && !error && (
+          <p id={`${props.name}-help`} className="text-sm text-neutral-500 mt-1">
+            {helperText}
+          </p>
+        )}
+      </div>
+    );
+  }
+);
+
+FormInput.displayName = 'FormInput';
