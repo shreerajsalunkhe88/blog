@@ -1,7 +1,7 @@
 export const corsMiddleware = (req, res, next) => {
   const origin = req.headers.origin;
 
-  const allowedOrigins = (process.env.CORS_ORIGINS || process.env.FRONTEND_URL || '')
+  const allowedOriginRules = (process.env.CORS_ORIGINS || process.env.FRONTEND_URL || '')
     .split(',')
     .map((value) => value.trim())
     .filter(Boolean);
@@ -13,7 +13,24 @@ export const corsMiddleware = (req, res, next) => {
     )
   );
 
-  const isAllowedOrigin = Boolean(origin) && (isLocalhost || allowedOrigins.includes(origin));
+  const matchesAllowedRule = (currentOrigin) => {
+    return allowedOriginRules.some((rule) => {
+      if (rule === currentOrigin) return true;
+
+      // Support wildcard subdomains like: https://*.vercel.app
+      if (rule.includes('*')) {
+        const escaped = rule
+          .replace(/[.+?^${}()|[\]\\]/g, '\\$&')
+          .replace(/\*/g, '.*');
+        const wildcardRegex = new RegExp(`^${escaped}$`);
+        return wildcardRegex.test(currentOrigin);
+      }
+
+      return false;
+    });
+  };
+
+  const isAllowedOrigin = Boolean(origin) && (isLocalhost || matchesAllowedRule(origin));
 
   // Requests from servers/tools may not include Origin; allow those.
   if (!origin) {
